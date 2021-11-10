@@ -1,9 +1,14 @@
 package com.library.step_definitions;
 
+import com.library.pages.BookPage;
+import com.library.pages.CommonAreaPage;
+import com.library.utility.BrowserUtil;
 import com.library.utility.DB_Util;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
+
+import java.util.Map;
 
 public class BookStepDefs {
     String actualCategory;
@@ -43,4 +48,56 @@ public class BookStepDefs {
     public void verify_is_the_user_who_reads_the_most(String expectedUser) {
         Assert.assertEquals(expectedUser, actualUser);
     }
+
+
+
+
+
+    @When("I navigate to {string} page")
+    public void i_navigate_to_page(String moduleName) {
+        new CommonAreaPage().navigateModule(moduleName);
+    }
+    BookPage bookPage=new BookPage();
+
+    String bookName;
+    @When("I open a book called {string}")
+    public void i_open_a_book_called(String book) {
+        bookName=book;
+        bookPage.search.sendKeys(bookName);
+        BrowserUtil.waitFor(3);
+
+
+    }
+    @When("I execute query to get the book information from books table")
+    public void i_execute_query_to_get_the_book_information_from_books_table() {
+        String query="select name, author, year from books where name='"+bookName+"'";
+        DB_Util.runQuery(query);
+        }
+
+
+        @Then("verify book DB and UI information must match")
+    public void verify_book_db_and_ui_information_must_match() {
+
+            // DB Data
+            Map<String, String> bookMap = DB_Util.getRowMap(1);
+            String actualBookName = bookMap.get("name");
+            String actualAuthor = bookMap.get("author");
+            String actualYear = bookMap.get("year");
+
+
+            // UI Data
+
+            String expectedBookName = bookPage.bookName.getText();
+            String expectedAuthor = bookPage.authorName.getText();
+            String expectedYear = bookPage.year.getText();
+
+            // Verify
+
+            Assert.assertEquals(expectedBookName, actualBookName);
+            Assert.assertEquals(expectedAuthor, actualAuthor);
+            Assert.assertEquals(expectedYear, actualYear);
+
+
+
+        }
 }
