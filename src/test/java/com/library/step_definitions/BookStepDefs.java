@@ -8,6 +8,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 
+import java.util.List;
 import java.util.Map;
 
 public class BookStepDefs {
@@ -50,54 +51,76 @@ public class BookStepDefs {
     }
 
 
-
-
-
     @When("I navigate to {string} page")
     public void i_navigate_to_page(String moduleName) {
         new CommonAreaPage().navigateModule(moduleName);
     }
-    BookPage bookPage=new BookPage();
+
+    BookPage bookPage = new BookPage();
 
     String bookName;
+
     @When("I open a book called {string}")
     public void i_open_a_book_called(String book) {
-        bookName=book;
+        bookName = book;
         bookPage.search.sendKeys(bookName);
         BrowserUtil.waitFor(3);
 
 
     }
+
     @When("I execute query to get the book information from books table")
     public void i_execute_query_to_get_the_book_information_from_books_table() {
-        String query="select name, author, year from books where name='"+bookName+"'";
+        String query = "select name, author, year from books where name='" + bookName + "'";
         DB_Util.runQuery(query);
-        }
+    }
 
 
-        @Then("verify book DB and UI information must match")
+    @Then("verify book DB and UI information must match")
     public void verify_book_db_and_ui_information_must_match() {
 
-            // DB Data
-            Map<String, String> bookMap = DB_Util.getRowMap(1);
-            String actualBookName = bookMap.get("name");
-            String actualAuthor = bookMap.get("author");
-            String actualYear = bookMap.get("year");
+        // DB Data
+        Map<String, String> bookMap = DB_Util.getRowMap(1);
+        String actualBookName = bookMap.get("name");
+        String actualAuthor = bookMap.get("author");
+        String actualYear = bookMap.get("year");
 
 
-            // UI Data
+        // UI Data
 
-            String expectedBookName = bookPage.bookName.getText();
-            String expectedAuthor = bookPage.authorName.getText();
-            String expectedYear = bookPage.year.getText();
+        String expectedBookName = bookPage.bookName.getText();
+        String expectedAuthor = bookPage.authorName.getText();
+        String expectedYear = bookPage.year.getText();
 
-            // Verify
+        // Verify
 
-            Assert.assertEquals(expectedBookName, actualBookName);
-            Assert.assertEquals(expectedAuthor, actualAuthor);
-            Assert.assertEquals(expectedYear, actualYear);
+        Assert.assertEquals(expectedBookName, actualBookName);
+        Assert.assertEquals(expectedAuthor, actualAuthor);
+        Assert.assertEquals(expectedYear, actualYear);
 
 
+    }
 
-        }
+    List<String> expectedCategoryList;
+
+    @When("I take all book categories in webpage")
+    public void i_take_all_book_categories_in_webpage() {
+        expectedCategoryList = BrowserUtil.getAllSelectOptions(bookPage.mainCategoryElement);
+        expectedCategoryList.remove(0);
+        System.out.println("expectedCategoryList = " + expectedCategoryList);
+    }
+
+    List<String> actualCategoryList;
+
+    @When("I execute query to get book categories")
+    public void i_execute_query_to_get_book_categories() {
+        String query = "select name from book_categories";
+        DB_Util.runQuery(query);
+        actualCategoryList = DB_Util.getColumnDataAsList(1);
+    }
+
+    @Then("verify book categories must match book_categories table from db")
+    public void verify_book_categories_must_match_book_categories_table_from_db() {
+        Assert.assertEquals(expectedCategoryList, actualCategoryList);
+    }
 }
