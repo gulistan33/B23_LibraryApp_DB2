@@ -44,14 +44,19 @@ public class UserInfoStepDef {
         Assert.assertEquals(expectedList.size(), actualList.size());
     }
 
-
-
+    List<String> actualColumnNameList=new ArrayList<>();
     @When("Execute query to get all columns")
     public void execute_query_to_get_all_columns() {
+        String query="select * from users";
+        DB_Util.runQuery(query);
 
+        actualColumnNameList = DB_Util.getAllColumnNamesAsList();
     }
-    @Then("verify the below columns are listed in result")
-    public void verify_the_below_columns_are_listed_in_result(io.cucumber.datatable.DataTable dataTable) {
 
+    @Then("verify the below columns are listed in result")
+    public void verify_the_below_columns_are_listed_in_result(List<String> expectedColumnNameList) {
+        System.out.println("actualColumnNameList = " + actualColumnNameList);
+        System.out.println("expectedColumnNameList = " + expectedColumnNameList);
+        Assert.assertEquals(expectedColumnNameList, actualColumnNameList);
     }
 }
