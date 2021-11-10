@@ -1,6 +1,7 @@
 package com.library.step_definitions;
 
 import com.library.utility.ConfigReader;
+import com.library.utility.DB_Util;
 import com.library.utility.Driver;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class Hooks {
 
 
-    @Before
+    @Before("@ui")
     public void setupDriver() {
 
         Driver.getDriver().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -22,7 +23,7 @@ public class Hooks {
     }
 
 
-    @After
+    @After("@ui")
     public void tearDown(Scenario scenario) {
 
         // check if scenario failed or not
@@ -34,5 +35,22 @@ public class Hooks {
             scenario.attach(screenshot,"image/png","Image for failed step");
         }
         Driver.closeBrowser();
+    }
+
+
+    @Before("@db")
+    public void dbSetup() {
+
+        DB_Util.createConnection(ConfigReader.read("library2.db.url"),
+                ConfigReader.read("library2.db.username"),
+                ConfigReader.read("library2.db.password"));
+
+    }
+
+
+    @After("@db")
+    public void dbTearDown() {
+
+        DB_Util.destroy();
     }
 }
